@@ -56,3 +56,48 @@ fun Record(viewModel: OutfitViewModel = viewModel()) {
         }
     }
 
+    // UI layout
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Text("Record Your Outfit", style = MaterialTheme.typography.headlineSmall)
+
+        // Date picker button
+        OutlinedButton(onClick = { datePickerDialog.show() }) {
+            Text("📅 Date: $selectedDate")
+        }
+
+        // Dropdown menu for selecting style
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = selectedStyle,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Style") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                styles.forEach { style ->
+                    DropdownMenuItem(
+                        text = { Text(style) },
+                        onClick = {
+                            selectedStyle = style
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
