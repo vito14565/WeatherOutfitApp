@@ -101,3 +101,24 @@ fun Record(viewModel: OutfitViewModel = viewModel()) {
             }
         }
 
+        // Outfit description input field (multiline)
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Description") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp),
+            maxLines = 6
+        )
+
+        // Submit button
+        Button(
+            onClick = { handleSubmit() },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Submit")
+        }
+    }
+}
+
