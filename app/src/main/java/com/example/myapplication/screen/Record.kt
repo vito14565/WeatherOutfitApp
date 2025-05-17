@@ -35,3 +35,23 @@ fun Record(viewModel: OutfitViewModel = viewModel()) {
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
+
+    // Outfit style dropdown menu
+    val styles = listOf("Casual", "Formal", "Sporty", "Street", "Business")
+    var expanded by remember { mutableStateOf(false) }
+    var selectedStyle by remember { mutableStateOf(styles.first()) }
+
+    // Description input field
+    var description by remember { mutableStateOf("") }
+
+    // Handle submit button click
+    fun handleSubmit() {
+        if (description.isBlank()) {
+            Toast.makeText(context, "Please enter a description.", Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.insertOutfit(selectedDate, selectedStyle, description)
+            Toast.makeText(context, "Outfit saved!", Toast.LENGTH_SHORT).show()
+            // Optional: clear the input
+            description = ""
+        }
+    }
