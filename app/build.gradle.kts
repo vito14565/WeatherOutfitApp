@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.weatheroutfitassistant"
+    namespace = "com.example.myapplication"
     compileSdk = 34
 
     defaultConfig {

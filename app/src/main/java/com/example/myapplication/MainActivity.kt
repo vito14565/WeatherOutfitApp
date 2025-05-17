@@ -1,4 +1,4 @@
-package com.example.weatheroutfitassistant
+package com.example.myapplication
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.weatheroutfitassistant.screen.HomeScreen
-import com.example.weatheroutfitassistant.ui.theme.WeatherOutfitAssistantTheme
+import com.example.myapplication.screen.HomeScreen
+import com.example.myapplication.ui.theme.WeatherOutfitAssistantTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
