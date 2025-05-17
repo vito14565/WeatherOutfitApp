@@ -19,7 +19,19 @@ import java.util.*
 fun Record(viewModel: OutfitViewModel = viewModel()) {
     val context = LocalContext.current
 
-    // 日期相关状态
+    // Date-related state
     val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     var selectedDate by remember { mutableStateOf(dateFormat.format(calendar.time)) }
+
+    // Show date picker dialog
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, day ->
+            calendar.set(year, month, day)
+            selectedDate = dateFormat.format(calendar.time)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
