@@ -1,111 +1,102 @@
 package com.example.myapplication.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.viewmodel.WeatherViewModel
+import com.example.myapplication.util.weather.getWeatherIcon
+import com.example.myapplication.util.weather.getClothingSuggestion
 
 @Composable
-fun HomeScreen() {
-    var selectedIndex by remember { mutableStateOf(0) }
+fun Home(viewModel: WeatherViewModel = viewModel()) {
+    val weather by viewModel.weather.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                    selected = selectedIndex == 0,
-                    onClick = { selectedIndex = 0 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Create, contentDescription = "Form") },
-                    label = { Text("Log") },
-                    selected = selectedIndex == 1,
-                    onClick = { selectedIndex = 1 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Menu, contentDescription = "History") },
-                    label = { Text("History") },
-                    selected = selectedIndex == 2,
-                    onClick = { selectedIndex = 2 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.AccountBox, contentDescription = "Report") },
-                    label = { Text("Report") },
-                    selected = selectedIndex == 3,
-                    onClick = { selectedIndex = 3 }
-                )
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            //Spacer(modifier = Modifier.height(40.dp))
-            Text(
-                text = "Weather & Outfit Assistant",
-                fontSize = 22.sp,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Simulated weather information
-            Text(text = "📍 Melbourne", fontSize = 18.sp)
-            Text(text = "🌤 18°C, Partly Cloudy", fontSize = 20.sp)
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Divider()
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Simulated outfit suggestions
-            Text(
-                text = "👕 Outfit Suggestion",
-                style = MaterialTheme.typography.titleSmall,
-                fontSize = 18.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = "- Light jacket", fontSize = 16.sp)
-            Text(text = "- Long jeans", fontSize = 16.sp)
-            Text(text = "- Umbrella (optional)", fontSize = 16.sp)
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Button(onClick = { /* future: refresh weather */ }) {
-                Text("Refresh")
-            }
-        }
+    // 页面首次加载时自动触发天气请求
+    LaunchedEffect(Unit) {
+        viewModel.fetchMelbourneWeather()
     }
 
+    // 使用 Box 包裹整个内容居中显示
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        if (weather != null) {
+            // 提取天气相关信息
+            val city = weather!!.name
+            val temperature = weather!!.main.temp
+            val feelsLike = weather!!.main.feels_like
+            val pressure = weather!!.main.pressure
+            val humidity = weather!!.main.humidity
+            val windSpeed = weather!!.wind.speed
+            val windDeg = weather!!.wind.deg
+            val visibility = weather!!.visibility
+            val description = weather!!.weather.first().description
+            val iconResId = getWeatherIcon(description)
+            val clothingSuggestion = getClothingSuggestion(temperature, description)
+
+            // 主体布局
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // 天气卡片
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = city,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Image(
+                            painter = painterResource(id = iconResId),
+                            contentDescription = description.replaceFirstChar { it.uppercase() },
+                            modifier = Modifier.size(80.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "${temperature}°C",
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Text(
+                            text = description.replaceFirstChar { it.uppercase() },
+                            fontSize = 18.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
+        } else {
+            // 加载中显示转圈
+            CircularProgressIndicator()
+        }
+    }
 }
