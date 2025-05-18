@@ -20,12 +20,12 @@ import com.example.myapplication.util.weather.getClothingSuggestion
 fun Home(viewModel: WeatherViewModel = viewModel()) {
     val weather by viewModel.weather.collectAsState()
 
-    // 页面首次加载时自动触发天气请求
+    // Automatically trigger weather request when the page loads
     LaunchedEffect(Unit) {
         viewModel.fetchMelbourneWeather()
     }
 
-    // 使用 Box 包裹整个内容居中显示
+    // Use Box to center the entire content
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -33,7 +33,7 @@ fun Home(viewModel: WeatherViewModel = viewModel()) {
         contentAlignment = Alignment.TopCenter
     ) {
         if (weather != null) {
-            // 提取天气相关信息
+            // Extract weather-related information
             val city = weather!!.name
             val temperature = weather!!.main.temp
             val feelsLike = weather!!.main.feels_like
@@ -46,13 +46,13 @@ fun Home(viewModel: WeatherViewModel = viewModel()) {
             val iconResId = getWeatherIcon(description)
             val clothingSuggestion = getClothingSuggestion(temperature, description)
 
-            // 主体布局
+            // Main layout
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // 天气卡片
+                // Weather card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -94,8 +94,38 @@ fun Home(viewModel: WeatherViewModel = viewModel()) {
                     }
                 }
             }
+
+            // Clothing suggestion card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF6F6F6)),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "👕 Clothing Suggestion",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = clothingSuggestion,
+                        fontSize = 16.sp,
+                        color = Color.DarkGray
+                    )
+                }
+            }
+
         } else {
-            // 加载中显示转圈
+            // Show a loading spinner while fetching data
             CircularProgressIndicator()
         }
     }
