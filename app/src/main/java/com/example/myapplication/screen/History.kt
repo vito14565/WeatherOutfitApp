@@ -1,111 +1,86 @@
 package com.example.myapplication.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
-
-// Data class for outfit record
-data class OutfitRecord(
-    val date: String,
-    val type: String,
-    val notes: String
-)
-
-// Simulated history data (all notes in English)
-val sampleHistory = listOf(
-    OutfitRecord("10/04/2025", "Casual", "Wore a T-shirt and jeans on a sunny day."),
-    OutfitRecord("11/04/2025", "Business", "Attended a meeting wearing a blazer and dress shoes."),
-    OutfitRecord("12/04/2025", "Sporty", "Went for a run wearing a hoodie and sneakers."),
-    OutfitRecord("13/04/2025", "Casual", "Wore a light jacket and boots due to rainy weather."),
-    OutfitRecord("14/04/2025", "Formal", "Dressed formally for an evening event."),
-    OutfitRecord("15/04/2025", "Other", "Experimented with a new style including a trench coat.")
-)
-
-
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.viewmodel.OutfitViewModel
+import com.example.myapplication.data.entity.Outfit
 
 @Composable
-fun HistoryScreen() {
+fun History(viewModel: OutfitViewModel = viewModel()) {
+    // 实时监听所有穿搭记录
+    val outfits by viewModel.allOutfits.collectAsState(initial = emptyList())
 
-    var selectedIndex by remember { mutableStateOf(0) }
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                    selected = selectedIndex == 0,
-                    onClick = { selectedIndex = 0 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Create, contentDescription = "Form") },
-                    label = { Text("Log") },
-                    selected = selectedIndex == 1,
-                    onClick = { selectedIndex = 1 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Menu, contentDescription = "History") },
-                    label = { Text("History") },
-                    selected = selectedIndex == 2,
-                    onClick = { selectedIndex = 2 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.AccountBox, contentDescription = "Report") },
-                    label = { Text("Report") },
-                    selected = selectedIndex == 3,
-                    onClick = { selectedIndex = 3 }
-                )
+    // 用于弹出删除确认对话框的状态
+    var outfitToDelete by remember { mutableStateOf<Outfit?>(null) }
+
+    // 页面布局
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // 顶部标题
+        Text(
+            text = "🗂 Outfit History",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // 无数据提示
+        if (outfits.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("No outfit records yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-            Text("Outfit History", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(sampleHistory) { record ->
+        } else {
+            // 列表展示
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(outfits) { outfit ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = "📅 Date: ${record.date}", style = MaterialTheme.typography.titleMedium)
-                            Text(text = "👕 Type: ${record.type}")
-                            Text(text = "📝 Notes: ${record.notes}")
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            // 顶部 Row（左侧内容，右侧删除按钮）
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text("📅 ${outfit.date}", fontWeight = FontWeight.SemiBold)
+                                    Text("🎽 Style: ${outfit.style}", color = MaterialTheme.colorScheme.primary)
+                                }
+
+                                // 删除按钮
+                                IconButton(onClick = {
+                                    outfitToDelete = outfit // 设置待删除对象，触发对话框
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(outfit.description)
                         }
                     }
                 }
@@ -113,4 +88,25 @@ fun HistoryScreen() {
         }
     }
 
+    // 删除确认对话框
+    if (outfitToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { outfitToDelete = null },
+            title = { Text("Delete this record?") },
+            text = { Text("Are you sure you want to delete this outfit entry? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteOutfit(outfitToDelete!!)
+                    outfitToDelete = null
+                }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { outfitToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
